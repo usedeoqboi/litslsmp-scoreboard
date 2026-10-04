@@ -7,78 +7,106 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 
 public final class HudEditorScreen extends Screen {
+    private static final int PANEL_W = 380;
+    private static final int PANEL_H = 212;
+
+    private TextFieldWidget name;
+    private TextFieldWidget ping;
     private TextFieldWidget money;
     private TextFieldWidget coins;
     private TextFieldWidget kills;
     private TextFieldWidget deaths;
     private TextFieldWidget rank;
     private TextFieldWidget team;
+    private TextFieldWidget footer;
 
     public HudEditorScreen() {
         super(Text.literal("LitslSMP HUD Editor"));
     }
 
+    private int panelX() { return this.width / 2 - PANEL_W / 2; }
+    private int panelY() { return this.height / 2 - PANEL_H / 2; }
+
+    // column x offsets and row y offsets (of the field, relative to the panel)
+    private static int colX(int c) { return 15 + c * 120; }
+    private static int fieldY(int r) { return 57 + r * 44; }
+
     @Override
     protected void init() {
-        int panelX = this.width / 2 - 190;
-        int leftX = panelX + 25;
-        int rightX = panelX + 215;
-        int top = this.height / 2 - 105;
+        HudConfig c = LitslHpHudClient.CONFIG;
+        int px = panelX();
+        int py = panelY();
 
-        money = field(leftX, top + 30, LitslHpHudClient.CONFIG.money);
-        coins = field(leftX, top + 80, Integer.toString(LitslHpHudClient.CONFIG.coins));
-        kills = field(leftX, top + 130, Integer.toString(LitslHpHudClient.CONFIG.kills));
-        deaths = field(rightX, top + 30, Integer.toString(LitslHpHudClient.CONFIG.deaths));
-        rank = field(rightX, top + 80, LitslHpHudClient.CONFIG.pvpRank);
-        team = field(rightX, top + 130, LitslHpHudClient.CONFIG.team);
+        name = field(px + colX(0), py + fieldY(0), c.name);
+        ping = field(px + colX(1), py + fieldY(0), c.ping);
+        money = field(px + colX(2), py + fieldY(0), c.money);
+        coins = field(px + colX(0), py + fieldY(1), Integer.toString(c.coins));
+        kills = field(px + colX(1), py + fieldY(1), Integer.toString(c.kills));
+        deaths = field(px + colX(2), py + fieldY(1), Integer.toString(c.deaths));
+        rank = field(px + colX(0), py + fieldY(2), c.pvpRank);
+        team = field(px + colX(1), py + fieldY(2), c.team);
+        footer = field(px + colX(2), py + fieldY(2), c.footer);
 
+        addDrawableChild(name);
+        addDrawableChild(ping);
         addDrawableChild(money);
         addDrawableChild(coins);
         addDrawableChild(kills);
         addDrawableChild(deaths);
         addDrawableChild(rank);
         addDrawableChild(team);
+        addDrawableChild(footer);
 
-        addDrawableChild(ButtonWidget.builder(Text.literal(LitslHpHudClient.CONFIG.enabled ? "HUD: ON" : "HUD: OFF"), b -> {
+        int by = py + 182;
+
+        addDrawableChild(ButtonWidget.builder(Text.literal(c.enabled ? "HUD: ON" : "HUD: OFF"), b -> {
             LitslHpHudClient.CONFIG.enabled = !LitslHpHudClient.CONFIG.enabled;
             b.setMessage(Text.literal(LitslHpHudClient.CONFIG.enabled ? "HUD: ON" : "HUD: OFF"));
             LitslHpHudClient.CONFIG.save();
-        }).dimensions(panelX + 25, top + 172, 120, 22).build());
+        }).dimensions(px + colX(0), by, 110, 20).build());
 
         addDrawableChild(ButtonWidget.builder(Text.literal("Reset"), b -> {
             LitslHpHudClient.CONFIG.reset();
             LitslHpHudClient.CONFIG.save();
             reloadValues();
-        }).dimensions(panelX + 155, top + 172, 90, 22).build());
+        }).dimensions(px + colX(1), by, 110, 20).build());
 
         addDrawableChild(ButtonWidget.builder(Text.literal("Save"), b -> saveAndClose())
-                .dimensions(panelX + 255, top + 172, 120, 22).build());
+                .dimensions(px + colX(2), by, 110, 20).build());
     }
 
     private TextFieldWidget field(int x, int y, String value) {
-        TextFieldWidget f = new TextFieldWidget(this.textRenderer, x, y, 155, 22, Text.literal(""));
+        TextFieldWidget f = new TextFieldWidget(this.textRenderer, x, y, 110, 20, Text.literal(""));
         f.setMaxLength(32);
         f.setText(value);
         return f;
     }
 
     private void reloadValues() {
-        money.setText(LitslHpHudClient.CONFIG.money);
-        coins.setText(Integer.toString(LitslHpHudClient.CONFIG.coins));
-        kills.setText(Integer.toString(LitslHpHudClient.CONFIG.kills));
-        deaths.setText(Integer.toString(LitslHpHudClient.CONFIG.deaths));
-        rank.setText(LitslHpHudClient.CONFIG.pvpRank);
-        team.setText(LitslHpHudClient.CONFIG.team);
+        HudConfig c = LitslHpHudClient.CONFIG;
+        name.setText(c.name);
+        ping.setText(c.ping);
+        money.setText(c.money);
+        coins.setText(Integer.toString(c.coins));
+        kills.setText(Integer.toString(c.kills));
+        deaths.setText(Integer.toString(c.deaths));
+        rank.setText(c.pvpRank);
+        team.setText(c.team);
+        footer.setText(c.footer);
     }
 
     private void saveAndClose() {
-        LitslHpHudClient.CONFIG.money = money.getText().trim();
-        LitslHpHudClient.CONFIG.coins = parseInt(coins.getText(), LitslHpHudClient.CONFIG.coins);
-        LitslHpHudClient.CONFIG.kills = parseInt(kills.getText(), LitslHpHudClient.CONFIG.kills);
-        LitslHpHudClient.CONFIG.deaths = parseInt(deaths.getText(), LitslHpHudClient.CONFIG.deaths);
-        LitslHpHudClient.CONFIG.pvpRank = rank.getText().trim();
-        LitslHpHudClient.CONFIG.team = team.getText().trim();
-        LitslHpHudClient.CONFIG.save();
+        HudConfig c = LitslHpHudClient.CONFIG;
+        c.name = name.getText().trim();
+        c.ping = ping.getText().trim();
+        c.money = money.getText().trim();
+        c.coins = parseInt(coins.getText(), c.coins);
+        c.kills = parseInt(kills.getText(), c.kills);
+        c.deaths = parseInt(deaths.getText(), c.deaths);
+        c.pvpRank = rank.getText().trim();
+        c.team = team.getText().trim();
+        c.footer = footer.getText().trim();
+        c.save();
         close();
     }
 
@@ -96,32 +124,32 @@ public final class HudEditorScreen extends Screen {
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
         super.renderBackground(context, mouseX, mouseY, delta);
 
-        int panelX = this.width / 2 - 190;
-        int panelY = this.height / 2 - 125;
-        int panelW = 380;
-        int panelH = 220;
-
-        context.fill(panelX - 2, panelY - 2, panelX + panelW + 2, panelY + panelH + 2, 0xFF101014);
-        context.fill(panelX, panelY, panelX + panelW, panelY + panelH, 0xFF18181E);
-        context.fill(panelX, panelY, panelX + panelW, panelY + 3, 0xFF35FF35);
+        int px = panelX();
+        int py = panelY();
+        context.fill(px - 2, py - 2, px + PANEL_W + 2, py + PANEL_H + 2, 0xFF101014);
+        context.fill(px, py, px + PANEL_W, py + PANEL_H, 0xFF18181E);
+        context.fill(px, py, px + PANEL_W, py + 3, 0xFF35FF35);
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
-        int panelX = this.width / 2 - 190;
-        int panelY = this.height / 2 - 125;
+        int px = panelX();
+        int py = panelY();
 
-        context.drawTextWithShadow(this.textRenderer, Text.literal("LitslSMP HUD Editor"), panelX + 20, panelY + 15, 0xFFFFFFFF);
-        context.drawTextWithShadow(this.textRenderer, Text.literal("Client-side display settings"), panelX + 20, panelY + 27, 0xFF88888F);
+        context.drawTextWithShadow(this.textRenderer, Text.literal("LitslSMP HUD Editor"), px + 15, py + 10, 0xFFFFFFFF);
+        context.drawTextWithShadow(this.textRenderer, Text.literal("Leave Name / Ping empty to use your real ones"), px + 15, py + 22, 0xFF88888F);
 
-        label(context, "Money", panelX + 25, panelY + 52);
-        label(context, "Coins", panelX + 25, panelY + 102);
-        label(context, "Kills", panelX + 25, panelY + 152);
-        label(context, "Deaths", panelX + 215, panelY + 52);
-        label(context, "PvP Rank", panelX + 215, panelY + 102);
-        label(context, "Team", panelX + 215, panelY + 152);
+        label(context, "Name", px + colX(0), py + fieldY(0) - 11);
+        label(context, "Ping (ms)", px + colX(1), py + fieldY(0) - 11);
+        label(context, "Money", px + colX(2), py + fieldY(0) - 11);
+        label(context, "Coins", px + colX(0), py + fieldY(1) - 11);
+        label(context, "Kills", px + colX(1), py + fieldY(1) - 11);
+        label(context, "Deaths", px + colX(2), py + fieldY(1) - 11);
+        label(context, "PvP Rank", px + colX(0), py + fieldY(2) - 11);
+        label(context, "Team", px + colX(1), py + fieldY(2) - 11);
+        label(context, "Footer text", px + colX(2), py + fieldY(2) - 11);
     }
 
     private void label(DrawContext context, String text, int x, int y) {
