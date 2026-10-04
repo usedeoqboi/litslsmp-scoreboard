@@ -15,6 +15,8 @@ public final class HudConfig {
     private static final Path FILE = Path.of("config", "litslhp_hud.json");
 
     public boolean enabled = true;
+    public String name = "";   // empty = use your real username
+    public String ping = "";   // empty = use your real ping
     public String money = "687.47M";
     public int coins = 37;
     public int kills = 105;
@@ -29,6 +31,8 @@ public final class HudConfig {
             if (Files.exists(FILE)) {
                 JsonObject root = JsonParser.parseString(Files.readString(FILE, StandardCharsets.UTF_8)).getAsJsonObject();
                 if (root.has("enabled")) config.enabled = root.get("enabled").getAsBoolean();
+                if (root.has("name")) config.name = root.get("name").getAsString();
+                if (root.has("ping")) config.ping = root.get("ping").getAsString();
                 if (root.has("money")) config.money = root.get("money").getAsString();
                 if (root.has("coins")) config.coins = root.get("coins").getAsInt();
                 if (root.has("kills")) config.kills = root.get("kills").getAsInt();
@@ -48,6 +52,8 @@ public final class HudConfig {
             Files.createDirectories(FILE.getParent());
             JsonObject root = new JsonObject();
             root.addProperty("enabled", enabled);
+            root.addProperty("name", name);
+            root.addProperty("ping", ping);
             root.addProperty("money", money);
             root.addProperty("coins", coins);
             root.addProperty("kills", kills);
@@ -62,6 +68,8 @@ public final class HudConfig {
 
     public void reset() {
         enabled = true;
+        name = "";
+        ping = "";
         money = "687.47M";
         coins = 37;
         kills = 105;
