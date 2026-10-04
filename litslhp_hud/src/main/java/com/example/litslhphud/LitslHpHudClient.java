@@ -22,6 +22,7 @@ import java.util.Locale;
 public final class LitslHpHudClient implements ClientModInitializer {
     public static HudConfig CONFIG;
     private static KeyBinding openEditor;
+       private static final KeyBinding.Category KEY_CATEGORY = KeyBinding.Category.create(Identifier.of("litslhp_hud", "main"));
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
 
     @Override
@@ -32,7 +33,7 @@ public final class LitslHpHudClient implements ClientModInitializer {
                 "key.litslhp_hud.open_editor",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
-                "category.litslhp_hud"
+                   KEY_CATEGORY
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
