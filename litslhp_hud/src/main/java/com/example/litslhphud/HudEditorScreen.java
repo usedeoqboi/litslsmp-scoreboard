@@ -15,7 +15,7 @@ public final class HudEditorScreen extends Screen {
     private TextFieldWidget team;
 
     public HudEditorScreen() {
-        super(Text.literal("LitslHP HUD Editor"));
+        super(Text.literal("LitslSMP HUD Editor"));
     }
 
     @Override
@@ -25,12 +25,12 @@ public final class HudEditorScreen extends Screen {
         int rightX = panelX + 215;
         int top = this.height / 2 - 105;
 
-        money = field(leftX, top + 30, HudEditorScreen.class.getSimpleName(), LitslHpHudClient.CONFIG.money);
-        coins = field(leftX, top + 80, "", Integer.toString(LitslHpHudClient.CONFIG.coins));
-        kills = field(leftX, top + 130, "", Integer.toString(LitslHpHudClient.CONFIG.kills));
-        deaths = field(rightX, top + 30, "", Integer.toString(LitslHpHudClient.CONFIG.deaths));
-        rank = field(rightX, top + 80, "", LitslHpHudClient.CONFIG.pvpRank);
-        team = field(rightX, top + 130, "", LitslHpHudClient.CONFIG.team);
+        money = field(leftX, top + 30, LitslHpHudClient.CONFIG.money);
+        coins = field(leftX, top + 80, Integer.toString(LitslHpHudClient.CONFIG.coins));
+        kills = field(leftX, top + 130, Integer.toString(LitslHpHudClient.CONFIG.kills));
+        deaths = field(rightX, top + 30, Integer.toString(LitslHpHudClient.CONFIG.deaths));
+        rank = field(rightX, top + 80, LitslHpHudClient.CONFIG.pvpRank);
+        team = field(rightX, top + 130, LitslHpHudClient.CONFIG.team);
 
         addDrawableChild(money);
         addDrawableChild(coins);
@@ -55,10 +55,10 @@ public final class HudEditorScreen extends Screen {
                 .dimensions(panelX + 255, top + 172, 120, 22).build());
     }
 
-    private TextFieldWidget field(int x, int y, String unused, String value) {
+    private TextFieldWidget field(int x, int y, String value) {
         TextFieldWidget f = new TextFieldWidget(this.textRenderer, x, y, 155, 22, Text.literal(""));
-        f.setText(value);
         f.setMaxLength(32);
+        f.setText(value);
         return f;
     }
 
@@ -90,9 +90,11 @@ public final class HudEditorScreen extends Screen {
         }
     }
 
+    // The panel is drawn as part of the background. Screen.render() already calls
+    // renderBackground once, and calling it a second time crashes in 1.21.x.
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.renderBackground(context, mouseX, mouseY, delta);
 
         int panelX = this.width / 2 - 190;
         int panelY = this.height / 2 - 125;
@@ -102,8 +104,16 @@ public final class HudEditorScreen extends Screen {
         context.fill(panelX - 2, panelY - 2, panelX + panelW + 2, panelY + panelH + 2, 0xFF101014);
         context.fill(panelX, panelY, panelX + panelW, panelY + panelH, 0xFF18181E);
         context.fill(panelX, panelY, panelX + panelW, panelY + 3, 0xFF35FF35);
+    }
 
-        context.drawTextWithShadow(this.textRenderer, Text.literal("LitslHP HUD Editor"), panelX + 20, panelY + 15, 0xFFFFFFFF);
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
+
+        int panelX = this.width / 2 - 190;
+        int panelY = this.height / 2 - 125;
+
+        context.drawTextWithShadow(this.textRenderer, Text.literal("LitslSMP HUD Editor"), panelX + 20, panelY + 15, 0xFFFFFFFF);
         context.drawTextWithShadow(this.textRenderer, Text.literal("Client-side display settings"), panelX + 20, panelY + 27, 0xFF88888F);
 
         label(context, "Money", panelX + 25, panelY + 52);
@@ -112,8 +122,6 @@ public final class HudEditorScreen extends Screen {
         label(context, "Deaths", panelX + 215, panelY + 52);
         label(context, "PvP Rank", panelX + 215, panelY + 102);
         label(context, "Team", panelX + 215, panelY + 152);
-
-        super.render(context, mouseX, mouseY, delta);
     }
 
     private void label(DrawContext context, String text, int x, int y) {
