@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -52,6 +53,11 @@ public final class LitslHpHudClient implements ClientModInitializer {
             }
         });
 
+        // Hide the server's real sidebar scoreboard while the fake HUD is on
+        HudElementRegistry.replaceElement(VanillaHudElements.SCOREBOARD, previous -> (ctx, tickCounter) -> {
+            if (!CONFIG.enabled) previous.render(ctx, tickCounter);
+        });
+
         HudElementRegistry.addLast(Identifier.of("litslhp_hud", "hud"), LitslHpHudClient::renderHud);
     }
 
@@ -88,15 +94,18 @@ public final class LitslHpHudClient implements ClientModInitializer {
         }
         int w = Math.max(widest + 5, tr.getWidth(title) + 10);
 
-        int px = 4;
-        int py = 4;
+        // Layout (offsets from the top of the panel)
+        int h = 114;
+
+        // Same spot as the vanilla sidebar scoreboard: right edge, vertically centered
+        int px = ctx.getScaledWindowWidth() - w - 3;
+        int py = ctx.getScaledWindowHeight() / 2 - (h * 2) / 3;
 
         int titleY = py + 4;
         int dateY = titleY + 10;
         int nameY = dateY + 17;
         int rowY = nameY + 10;
         int footerY = rowY + 9 * labels.length - 9 + 15;
-        int h = footerY + 9 + 4 - py;
 
         // Background
         ctx.fill(px, py, px + w, py + h, 0x99000000);
