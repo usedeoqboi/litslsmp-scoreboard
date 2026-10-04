@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "litslhp_hud",
+  "version": "${version}",
+  "name": "LitslHP HUD",
+  "description": "Client-side editable HUD inspired by the supplied LitslHP screenshot.",
+  "authors": ["OpenAI"],
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.litslhphud.LitslHpHudClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "fabric-api": "*"
+  }
+}
